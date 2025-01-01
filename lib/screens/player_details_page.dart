@@ -18,20 +18,45 @@ class PlayerDetailsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Name: ${player.name}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Nom du joueur: ${player.name}',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 10),
-            Text('Device: ${player.device}'),
-            const SizedBox(height: 10),
-            if (player.device == 'mouse')
-              Text('Mouse Sensitivity: ${player.sensitivityMouse}')
-            else ...[
-              Text('Horizontal Sensitivity: ${player.sensitivityControllerHorizontal}'),
-              Text('Vertical Sensitivity: ${player.sensitivityControllerVertical}'),
+            SizedBox(height: 16),
+            Text(
+              'Jeu: ${player.game}',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Périphérique: ${player.device}',
+              style: TextStyle(fontSize: 18),
+            ),
+            // Afficher uniquement la sensibilité souris si le périphérique est "Mouse"
+            if (player.device == 'Mouse' &&
+                player.sensitivityMouse != null) ...[
+              SizedBox(height: 8),
+              Text(
+                'Sensibilité Souris: ${player.sensitivityMouse}',
+                style: TextStyle(fontSize: 18),
+              ),
             ],
-            const SizedBox(height: 10),
-            Text('Game: ${player.game}'),
+            // Afficher uniquement les sensibilités manette si le périphérique est "Controller"
+            if (player.device == 'Controller') ...[
+              if (player.sensitivityControllerHorizontal != null) ...[
+                SizedBox(height: 8),
+                Text(
+                  'Sensibilité Manette (Horizontal): ${player.sensitivityControllerHorizontal}',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ],
+              if (player.sensitivityControllerVertical != null) ...[
+                SizedBox(height: 8),
+                Text(
+                  'Sensibilité Manette (Vertical): ${player.sensitivityControllerVertical}',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ],
+            ],
           ],
         ),
       ),
