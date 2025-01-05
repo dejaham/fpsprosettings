@@ -2,7 +2,6 @@
 // Cette page présente les différents jeux disponibles dans l'application
 
 import 'package:flutter/material.dart';
-import 'dart:ui';
 import '../models/game.dart';
 import 'players_page.dart';
 
@@ -17,7 +16,6 @@ final List<Game> games = [
 
 // Widget principal de la page d'accueil
 class HomePage extends StatelessWidget {
-  // Ajout du paramètre `key` dans le constructeur
   const HomePage({Key? key}) : super(key: key);
 
   @override
@@ -60,14 +58,7 @@ class HomePage extends StatelessWidget {
             ),
             itemCount: games.length,
             itemBuilder: (context, index) {
-              final game = games[index];
-              return Hero(
-                tag: 'game-${game.name}',
-                child: Material(
-                  color: Colors.transparent,
-                  child: AnimatedGameCard(game: game),
-                ),
-              );
+              return AnimatedGameCard(game: games[index]);
             },
           ),
         ),
@@ -76,136 +67,81 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// Widget de carte de jeu animée
-// Gère l'animation au survol et le tap pour naviguer vers la page des joueurs
+// Widget de carte de jeu animée avec effet de pression
 class AnimatedGameCard extends StatefulWidget {
   final Game game;
 
-  const AnimatedGameCard({Key? key, required this.game}) : super(key: key);
+  const AnimatedGameCard({
+    Key? key,
+    required this.game,
+  }) : super(key: key);
 
   @override
   _AnimatedGameCardState createState() => _AnimatedGameCardState();
 }
 
-// État de la carte de jeu animée
-// Gère l'état de survol et les animations
-class _AnimatedGameCardState extends State<AnimatedGameCard> 
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  bool _isHovered = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 1, end: 1.05).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+// État de la carte de jeu avec animation de pression
+class _AnimatedGameCardState extends State<AnimatedGameCard> {
+  bool isPressed = false;
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) {
-        setState(() => _isHovered = true);
-        _controller.forward();
+    return GestureDetector(
+      onTapDown: (_) => setState(() => isPressed = true),
+      onTapUp: (_) => setState(() => isPressed = false),
+      onTapCancel: () => setState(() => isPressed = false),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PlayersPage(game: widget.game),
+          ),
+        );
       },
-      onExit: (_) {
-        setState(() => _isHovered = false);
-        _controller.reverse();
-      },
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PlayersPage(game: widget.game),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 100),
+        transform: Matrix4.identity()..scale(isPressed ? 0.95 : 1.0),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            image: DecorationImage(
+              image: AssetImage(widget.game.imageUrl),
+              fit: BoxFit.cover,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).primaryColor.withOpacity(isPressed ? 0.4 : 0.3),
+                blurRadius: isPressed ? 12 : 8,
+                offset: Offset(0, isPressed ? 2 : 4),
               ),
-            );
-          },
+            ],
+          ),
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(20),
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
                 colors: [
-                  Colors.white.withOpacity(0.1),
-                  Colors.white.withOpacity(0.05),
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.8),
                 ],
               ),
-              border: Border.all(
-                color: _isHovered 
-                    ? Theme.of(context).primaryColor
-                    : Colors.white.withOpacity(0.1),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).primaryColor.withOpacity(0.2),
-                  blurRadius: _isHovered ? 12 : 8,
-                  spreadRadius: _isHovered ? 2 : 0,
-                ),
-              ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      height: 100,
-                      width: 100,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.asset(
-                          widget.game.imageUrl,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.game.name,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    SizedBox(height: 16),
-                    Text(
-                      widget.game.name,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      '12 Pros', // À remplacer par le vrai nombre
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
