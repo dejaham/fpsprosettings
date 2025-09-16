@@ -110,7 +110,9 @@ class _AnimatedGameCardState extends State<AnimatedGameCard> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).primaryColor.withOpacity(isPressed ? 0.4 : 0.3),
+                color: Theme.of(context)
+                    .primaryColor
+                    .withOpacity(isPressed ? 0.4 : 0.3),
                 blurRadius: isPressed ? 12 : 8,
                 offset: Offset(0, isPressed ? 2 : 4),
               ),
@@ -137,9 +139,9 @@ class _AnimatedGameCardState extends State<AnimatedGameCard> {
                   Text(
                     widget.game.name,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ],
               ),
