@@ -1,16 +1,33 @@
-# fpsprosettings
+# FPS Pro Settings
 
-A new Flutter project.
+[![Flutter](https://img.shields.io/badge/Flutter-3.27.1-blue?logo=flutter)](https://flutter.dev/)  
+[![Firebase](https://img.shields.io/badge/Firebase-optional-yellow?logo=firebase)](https://firebase.google.com/)  
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-## Getting Started
+Une application mobile Flutter qui centralise les **réglages des joueurs professionnels** pour différents jeux FPS.  
+L’objectif est de permettre aux joueurs de **consulter rapidement les sensibilités et paramètres des joueurs pro**.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## 📱 Fonctionnalités
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Affichage des jeux FPS disponibles :  
+  - Call of Duty  
+  - Apex Legends  
+  - Valorant  
+  - Rainbow Six Siege  
+- Liste des joueurs professionnels par jeu.  
+- Affichage des paramètres de chaque joueur :  
+  - Périphérique (souris ou manette)  
+  - Sensibilité souris (si périphérique = souris)  
+  - Sensibilité manette horizontale/verticale (si périphérique = manette)  
+- Navigation simple et fluide entre les pages.  
+- Possibilité d’ajouter Firebase pour stocker et gérer les joueurs (prévu).
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 🛠️ Technologies utilisées
+
+- **Flutter** : framework multiplateforme pour Android/iOS  
+- **Dart** : langage principal de Flutter  
+- **Firebase (optionnel)** : stockage des données et futur backend  
