@@ -1,11 +1,15 @@
 // Point d'entrée principal de l'application
 // Ce fichier configure le thème global et lance l'application
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const FPSProSettingsApp());
 }
 
@@ -35,9 +39,9 @@ class FPSProSettingsApp extends StatelessWidget {
         // Configuration de la police Rajdhani pour un style gaming
         textTheme: GoogleFonts.rajdhaniTextTheme(
           Theme.of(context).textTheme.apply(
-            bodyColor: Colors.white,
-            displayColor: Colors.white,
-          ),
+                bodyColor: Colors.white,
+                displayColor: Colors.white,
+              ),
         ),
         // Style de la barre d'application
         appBarTheme: AppBarTheme(
