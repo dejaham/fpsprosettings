@@ -3,8 +3,10 @@ class Player {
   final String device; // "Mouse" ou "Controller"
   final String game;
   final double? sensitivityMouse; // Sensibilité de la souris
-  final double? sensitivityControllerHorizontal; // Sensibilité manette horizontale
+  final double?
+      sensitivityControllerHorizontal; // Sensibilité manette horizontale
   final double? sensitivityControllerVertical; // Sensibilité manette verticale
+  final int? dpi; // DPI de la souris
 
   Player({
     required this.name,
@@ -13,6 +15,6 @@ class Player {
     this.sensitivityMouse,
     this.sensitivityControllerHorizontal,
     this.sensitivityControllerVertical,
+    this.dpi,
   });
 }
-

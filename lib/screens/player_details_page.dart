@@ -145,14 +145,44 @@ class PlayerDetailsPage extends StatelessWidget {
                     ),
                     SizedBox(height: 20),
                     // Présentation des sensibilités sous forme de cartes métriques
-                    if (player.device == 'Mouse' &&
-                        player.sensitivityMouse != null)
-                      _metricCard(
-                        context,
-                        icon: Icons.mouse,
-                        label: 'Sensibilité Souris',
-                        value: player.sensitivityMouse!.toString(),
-                      ),
+                    if (player.device == 'Mouse') ...[
+                      if (player.dpi != null && player.sensitivityMouse != null)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _metricCard(
+                                context,
+                                icon: Icons.speed,
+                                label: 'DPI',
+                                value: player.dpi!.toString(),
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: _metricCard(
+                                context,
+                                icon: Icons.mouse,
+                                label: 'Sensibilité Souris',
+                                value: player.sensitivityMouse!.toString(),
+                              ),
+                            ),
+                          ],
+                        )
+                      else if (player.dpi != null)
+                        _metricCard(
+                          context,
+                          icon: Icons.speed,
+                          label: 'DPI',
+                          value: player.dpi!.toString(),
+                        )
+                      else if (player.sensitivityMouse != null)
+                        _metricCard(
+                          context,
+                          icon: Icons.mouse,
+                          label: 'Sensibilité Souris',
+                          value: player.sensitivityMouse!.toString(),
+                        ),
+                    ],
                     if (player.device == 'Controller') ...[
                       Row(
                         children: [

@@ -72,6 +72,25 @@ class PlayersPage extends StatelessWidget {
               return null;
             }
 
+            int? _toInt(dynamic v) {
+              if (v == null) return null;
+              if (v is int) return v;
+              if (v is num) return v.toInt();
+              if (v is String) return int.tryParse(v);
+              return null;
+            }
+
+            int? _getInt(Map<String, dynamic> m, List<String> keys) {
+              for (final k in keys) {
+                if (m.containsKey(k)) {
+                  final v = m[k];
+                  final d = _toInt(v);
+                  if (d != null) return d;
+                }
+              }
+              return null;
+            }
+
             return ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 100, 16, 16),
               itemCount: docs.length,
@@ -83,14 +102,23 @@ class PlayersPage extends StatelessWidget {
                     (data['device'] ?? '').toString().toLowerCase();
                 String device;
                 if (deviceRaw.contains('mouse') ||
-                    deviceRaw.contains('souris')) {
+                    deviceRaw.contains('souris') ||
+                    deviceRaw.contains('kbm') ||
+                    deviceRaw.contains('keyboard') ||
+                    deviceRaw.contains('clavier') ||
+                    deviceRaw.contains('pc')) {
                   device = 'Mouse';
                 } else if (deviceRaw.contains('controller') ||
-                    deviceRaw.contains('manette')) {
+                    deviceRaw.contains('manette') ||
+                    deviceRaw.contains('pad') ||
+                    deviceRaw.contains('gamepad')) {
                   device = 'Controller';
                 } else {
-                  // défaut: garder Controller pour garder les sections visibles si données présentes
-                  device = 'Controller';
+                  // défaut: garder Mouse si DPI/sens souris présent, sinon Controller
+                  device = (data.containsKey('dpi') ||
+                          data.containsKey('sensitivity'))
+                      ? 'Mouse'
+                      : 'Controller';
                 }
 
                 final player = Player(
@@ -111,9 +139,29 @@ class PlayersPage extends StatelessWidget {
                     'vertical',
                     'controller_vertical'
                   ]),
+                  dpi: _getInt(data, ['dpi', 'DPI', 'mouse_dpi']),
                 );
 
                 final isMouse = device == 'Mouse';
+                String subtitleText;
+                if (isMouse) {
+                  final parts = <String>[];
+                  parts.add('Mouse');
+                  if (player.dpi != null) parts.add('DPI: ${player.dpi}');
+                  if (player.sensitivityMouse != null)
+                    parts.add('Sens: ${player.sensitivityMouse}');
+                  subtitleText = parts.join(' — ');
+                } else {
+                  final parts = <String>[];
+                  parts.add('Controller');
+                  if (player.sensitivityControllerHorizontal != null) {
+                    parts.add('H: ${player.sensitivityControllerHorizontal}');
+                  }
+                  if (player.sensitivityControllerVertical != null) {
+                    parts.add('V: ${player.sensitivityControllerVertical}');
+                  }
+                  subtitleText = parts.join(' — ');
+                }
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
@@ -157,7 +205,7 @@ class PlayersPage extends StatelessWidget {
                             ),
                       ),
                       subtitle: Text(
-                        player.device,
+                        subtitleText,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.white70,
                             ),
