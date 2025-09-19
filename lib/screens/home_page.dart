@@ -8,10 +8,22 @@ import 'players_page.dart';
 // Liste statique des jeux FPS disponibles dans l'application
 // Chaque jeu est représenté par son nom et l'URL de son icône
 final List<Game> games = [
-  Game(name: 'Call of Duty', imageUrl: 'assets/images/cod_icon.jpg'),
-  Game(name: 'Apex Legends', imageUrl: 'assets/images/apex_icon.jpg'),
-  Game(name: 'Valorant', imageUrl: 'assets/images/valorant_icon.jpg'),
-  Game(name: 'Rainbow Six Siege', imageUrl: 'assets/images/r6_icon.jpg'),
+  Game(
+      id: 'call_of_duty',
+      name: 'Call of Duty',
+      imageUrl: 'assets/images/cod_icon.jpg'),
+  Game(
+      id: 'apex_legends',
+      name: 'Apex Legends',
+      imageUrl: 'assets/images/apex_icon.jpg'),
+  Game(
+      id: 'valorant',
+      name: 'Valorant',
+      imageUrl: 'assets/images/valorant_icon.jpg'),
+  Game(
+      id: 'rainbow_six_siege',
+      name: 'Rainbow Six Siege',
+      imageUrl: 'assets/images/r6_icon.jpg'),
 ];
 
 // Widget principal de la page d'accueil

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/player.dart';
 import '../models/game.dart';
-import '../data/dummy_players.dart';
 import 'player_details_page.dart';
 
 class PlayersPage extends StatelessWidget {
@@ -10,7 +11,10 @@ class PlayersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final filteredPlayers = dummyPlayers.where((player) => player.game == game.name).toList();
+    final playersCollection = FirebaseFirestore.instance
+        .collection('games')
+        .doc(game.id)
+        .collection('players');
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -30,20 +34,87 @@ class PlayersPage extends StatelessWidget {
             ],
           ),
         ),
-        child: filteredPlayers.isEmpty
-          ? Center(
-              child: Text(
-                'Aucun joueur trouvé pour ${game.name}',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white70,
+        child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: playersCollection.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return Center(
+                child: Text(
+                  'Aucun joueur trouvé pour ${game.name}',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white70,
+                      ),
                 ),
-              ),
-            )
-          : ListView.builder(
-              padding: EdgeInsets.fromLTRB(16, 100, 16, 16),
-              itemCount: filteredPlayers.length,
+              );
+            }
+
+            final docs = snapshot.data!.docs;
+
+            double? _toDouble(dynamic v) {
+              if (v == null) return null;
+              if (v is num) return v.toDouble();
+              if (v is String) return double.tryParse(v);
+              return null;
+            }
+
+            double? _getNumber(Map<String, dynamic> m, List<String> keys) {
+              for (final k in keys) {
+                if (m.containsKey(k)) {
+                  final v = m[k];
+                  final d = _toDouble(v);
+                  if (d != null) return d;
+                }
+              }
+              return null;
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 100, 16, 16),
+              itemCount: docs.length,
               itemBuilder: (context, index) {
-                final player = filteredPlayers[index];
+                final data = docs[index].data();
+
+                // Normalisation du device et mapping des champs
+                final deviceRaw =
+                    (data['device'] ?? '').toString().toLowerCase();
+                String device;
+                if (deviceRaw.contains('mouse') ||
+                    deviceRaw.contains('souris')) {
+                  device = 'Mouse';
+                } else if (deviceRaw.contains('controller') ||
+                    deviceRaw.contains('manette')) {
+                  device = 'Controller';
+                } else {
+                  // défaut: garder Controller pour garder les sections visibles si données présentes
+                  device = 'Controller';
+                }
+
+                final player = Player(
+                  name: (data['name'] ?? 'Unknown').toString(),
+                  device: device,
+                  game: game.name,
+                  sensitivityMouse: _getNumber(
+                      data, ['sensitivity', 'sens', 'mouse_sensitivity']),
+                  sensitivityControllerHorizontal: _getNumber(data, [
+                    'sens_horizontal',
+                    'sensHorizontal',
+                    'horizontal',
+                    'controller_horizontal'
+                  ]),
+                  sensitivityControllerVertical: _getNumber(data, [
+                    'sens_vertical',
+                    'sensVertical',
+                    'vertical',
+                    'controller_vertical'
+                  ]),
+                );
+
+                final isMouse = device == 'Mouse';
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
                   child: Container(
@@ -56,44 +127,47 @@ class PlayersPage extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).primaryColor.withOpacity(0.1),
+                          color:
+                              Theme.of(context).primaryColor.withOpacity(0.1),
                           blurRadius: 8,
-                          offset: Offset(0, 4),
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: ListTile(
-                      contentPadding: EdgeInsets.all(16),
+                      contentPadding: const EdgeInsets.all(16),
                       leading: Container(
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Theme.of(context).primaryColor.withOpacity(0.2),
+                          color:
+                              Theme.of(context).primaryColor.withOpacity(0.2),
                         ),
                         child: Icon(
-                          player.device == 'Mouse' ? Icons.mouse : Icons.gamepad,
+                          isMouse ? Icons.mouse : Icons.gamepad,
                           color: Theme.of(context).primaryColor,
                         ),
                       ),
                       title: Text(
                         player.name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       subtitle: Text(
                         player.device,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white70,
-                        ),
+                              color: Colors.white70,
+                            ),
                       ),
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PlayerDetailsPage(player: player),
+                            builder: (context) =>
+                                PlayerDetailsPage(player: player),
                           ),
                         );
                       },
@@ -101,7 +175,9 @@ class PlayersPage extends StatelessWidget {
                   ),
                 );
               },
-            ),
+            );
+          },
+        ),
       ),
     );
   }
