@@ -68,10 +68,13 @@ class PlayerDetailsPage extends StatelessWidget {
                           height: 64,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Theme.of(context).primaryColor.withOpacity(0.2),
+                            color:
+                                Theme.of(context).primaryColor.withOpacity(0.2),
                           ),
                           child: Icon(
-                            player.device == 'Mouse' ? Icons.mouse : Icons.gamepad,
+                            player.device == 'Mouse'
+                                ? Icons.mouse
+                                : Icons.gamepad,
                             color: Theme.of(context).primaryColor,
                             size: 32,
                           ),
@@ -84,17 +87,23 @@ class PlayerDetailsPage extends StatelessWidget {
                             children: [
                               Text(
                                 player.name,
-                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                               SizedBox(height: 4),
                               Text(
                                 player.game,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.white70,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      color: Colors.white70,
+                                    ),
                               ),
                             ],
                           ),
@@ -102,32 +111,74 @@ class PlayerDetailsPage extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 32),
-                    // Section des paramètres du joueur
-                    _buildSettingSection(
-                      context,
-                      'Périphérique',
-                      player.device,
+                    // Badges / Chips d'information rapides (ex: Périphérique)
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        Chip(
+                          avatar: Icon(
+                            player.device == 'Mouse'
+                                ? Icons.mouse
+                                : Icons.gamepad,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                          label: Text(
+                            player.device,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          backgroundColor: Colors.white.withOpacity(0.08),
+                          side: BorderSide(
+                            color: Theme.of(context)
+                                .primaryColor
+                                .withOpacity(0.35),
+                          ),
+                        ),
+                      ],
                     ),
-                    // Affichage conditionnel des paramètres de sensibilité selon le périphérique
-                    if (player.device == 'Mouse' && player.sensitivityMouse != null)
-                      _buildSettingSection(
+                    SizedBox(height: 20),
+                    // Présentation des sensibilités sous forme de cartes métriques
+                    if (player.device == 'Mouse' &&
+                        player.sensitivityMouse != null)
+                      _metricCard(
                         context,
-                        'Sensibilité Souris',
-                        player.sensitivityMouse.toString(),
+                        icon: Icons.mouse,
+                        label: 'Sensibilité Souris',
+                        value: player.sensitivityMouse!.toString(),
                       ),
                     if (player.device == 'Controller') ...[
-                      if (player.sensitivityControllerHorizontal != null)
-                        _buildSettingSection(
-                          context,
-                          'Sensibilité Horizontale',
-                          player.sensitivityControllerHorizontal.toString(),
-                        ),
-                      if (player.sensitivityControllerVertical != null)
-                        _buildSettingSection(
-                          context,
-                          'Sensibilité Verticale',
-                          player.sensitivityControllerVertical.toString(),
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _metricCard(
+                              context,
+                              icon: Icons.swap_horiz,
+                              label: 'Sensibilité Horizontale',
+                              value: player.sensitivityControllerHorizontal
+                                      ?.toString() ??
+                                  '-',
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: _metricCard(
+                              context,
+                              icon: Icons.swap_vert,
+                              label: 'Sensibilité Verticale',
+                              value: player.sensitivityControllerVertical
+                                      ?.toString() ??
+                                  '-',
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ],
                 ),
@@ -139,33 +190,53 @@ class PlayerDetailsPage extends StatelessWidget {
     );
   }
 
-  // Widget réutilisable pour afficher une section de paramètres
-  Widget _buildSettingSection(BuildContext context, String label, String value) {
+  // Nouvelle carte métrique compacte et élégante
+  Widget _metricCard(BuildContext context,
+      {required IconData icon, required String label, required String value}) {
     return Container(
-      margin: EdgeInsets.only(bottom: 24.0),
+      margin: EdgeInsets.only(bottom: 16.0),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withOpacity(0.35),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withOpacity(0.25),
+          width: 1,
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Étiquette du paramètre
-          Text(
-            label,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Colors.white70,
-              fontWeight: FontWeight.w500,
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Theme.of(context).primaryColor.withOpacity(0.18),
             ),
+            child: Icon(icon, color: Theme.of(context).primaryColor),
           ),
-          SizedBox(height: 8),
-          // Valeur du paramètre
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
             ),
           ),
         ],
