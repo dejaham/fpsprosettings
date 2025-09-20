@@ -80,10 +80,14 @@ class _PlayersPageState extends State<PlayersPage> {
           children: [
             // Barre de recherche en haut (hors StreamBuilder pour conserver le focus)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 100, 16, 8),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                MediaQuery.of(context).padding.top + kToolbarHeight + 8,
+                16,
+                8,
+              ),
               child: TextField(
                 controller: _searchController,
-                autofocus: true,
                 onChanged: (v) => setState(() => _searchQuery = v),
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
