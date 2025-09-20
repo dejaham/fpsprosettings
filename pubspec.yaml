@@ -36,6 +36,6 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/images/app_icon.jpg" # logo de l'application
+  image_path: "assets/images/app_icon.png" # logo de l'application
   adaptive_icon_background: "#000000" # couleur de fond (à ajuster)
-  adaptive_icon_foreground: "assets/images/app_icon.jpg"
+  adaptive_icon_foreground: "assets/images/app_icon.png"
