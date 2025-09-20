@@ -4,24 +4,66 @@ import '../models/player.dart';
 import '../models/game.dart';
 import 'player_details_page.dart';
 
-class PlayersPage extends StatelessWidget {
+enum DeviceFilterOption { all, mouse, controller }
+
+class PlayersPage extends StatefulWidget {
   final Game game;
 
   const PlayersPage({Key? key, required this.game}) : super(key: key);
 
   @override
+  State<PlayersPage> createState() => _PlayersPageState();
+}
+
+class _PlayersPageState extends State<PlayersPage> {
+  DeviceFilterOption _filter = DeviceFilterOption.all;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final playersCollection = FirebaseFirestore.instance
         .collection('games')
-        .doc(game.id)
+        .doc(widget.game.id)
         .collection('players');
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(game.name),
+        title: Text(widget.game.name),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          PopupMenuButton<DeviceFilterOption>(
+            icon: const Icon(Icons.filter_list),
+            initialValue: _filter,
+            onSelected: (value) {
+              setState(() {
+                _filter = value;
+              });
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: DeviceFilterOption.all,
+                child: Text('Tous les devices'),
+              ),
+              PopupMenuItem(
+                value: DeviceFilterOption.mouse,
+                child: Text('Souris uniquement'),
+              ),
+              PopupMenuItem(
+                value: DeviceFilterOption.controller,
+                child: Text('Manette uniquement'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -44,7 +86,7 @@ class PlayersPage extends StatelessWidget {
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return Center(
                 child: Text(
-                  'Aucun joueur trouvé pour ${game.name}',
+                  'Aucun joueur trouvé pour ${widget.game.name}',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: Colors.white70,
                       ),
@@ -54,179 +96,270 @@ class PlayersPage extends StatelessWidget {
 
             final docs = snapshot.data!.docs;
 
-            double? _toDouble(dynamic v) {
-              if (v == null) return null;
-              if (v is num) return v.toDouble();
-              if (v is String) return double.tryParse(v);
-              return null;
-            }
-
-            double? _getNumber(Map<String, dynamic> m, List<String> keys) {
-              for (final k in keys) {
-                if (m.containsKey(k)) {
-                  final v = m[k];
-                  final d = _toDouble(v);
-                  if (d != null) return d;
-                }
+            String _normalizeDevice(Map<String, dynamic> data) {
+              final deviceRaw = (data['device'] ?? '').toString().toLowerCase();
+              if (deviceRaw.contains('mouse') ||
+                  deviceRaw.contains('souris') ||
+                  deviceRaw.contains('kbm') ||
+                  deviceRaw.contains('keyboard') ||
+                  deviceRaw.contains('clavier') ||
+                  deviceRaw.contains('pc')) {
+                return 'Mouse';
+              } else if (deviceRaw.contains('controller') ||
+                  deviceRaw.contains('manette') ||
+                  deviceRaw.contains('pad') ||
+                  deviceRaw.contains('gamepad')) {
+                return 'Controller';
+              } else {
+                return (data.containsKey('dpi') ||
+                        data.containsKey('sensitivity'))
+                    ? 'Mouse'
+                    : 'Controller';
               }
-              return null;
             }
 
-            int? _toInt(dynamic v) {
-              if (v == null) return null;
-              if (v is int) return v;
-              if (v is num) return v.toInt();
-              if (v is String) return int.tryParse(v);
-              return null;
-            }
-
-            int? _getInt(Map<String, dynamic> m, List<String> keys) {
-              for (final k in keys) {
-                if (m.containsKey(k)) {
-                  final v = m[k];
-                  final d = _toInt(v);
-                  if (d != null) return d;
-                }
+            // Filtrage par device
+            final filteredDocs = docs.where((d) {
+              final dev = _normalizeDevice(d.data());
+              switch (_filter) {
+                case DeviceFilterOption.all:
+                  return true;
+                case DeviceFilterOption.mouse:
+                  return dev == 'Mouse';
+                case DeviceFilterOption.controller:
+                  return dev == 'Controller';
               }
-              return null;
-            }
+            }).toList();
 
-            return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 100, 16, 16),
-              itemCount: docs.length,
-              itemBuilder: (context, index) {
-                final data = docs[index].data();
+            // Filtrage par nom (insensible à la casse)
+            final q = _searchQuery.trim().toLowerCase();
+            final visibleDocs = filteredDocs.where((d) {
+              if (q.isEmpty) return true;
+              final name = (d.data()['name'] ?? '').toString().toLowerCase();
+              return name.contains(q);
+            }).toList();
 
-                // Normalisation du device et mapping des champs
-                final deviceRaw =
-                    (data['device'] ?? '').toString().toLowerCase();
-                String device;
-                if (deviceRaw.contains('mouse') ||
-                    deviceRaw.contains('souris') ||
-                    deviceRaw.contains('kbm') ||
-                    deviceRaw.contains('keyboard') ||
-                    deviceRaw.contains('clavier') ||
-                    deviceRaw.contains('pc')) {
-                  device = 'Mouse';
-                } else if (deviceRaw.contains('controller') ||
-                    deviceRaw.contains('manette') ||
-                    deviceRaw.contains('pad') ||
-                    deviceRaw.contains('gamepad')) {
-                  device = 'Controller';
-                } else {
-                  // défaut: garder Mouse si DPI/sens souris présent, sinon Controller
-                  device = (data.containsKey('dpi') ||
-                          data.containsKey('sensitivity'))
-                      ? 'Mouse'
-                      : 'Controller';
-                }
-
-                final player = Player(
-                  name: (data['name'] ?? 'Unknown').toString(),
-                  device: device,
-                  game: game.name,
-                  sensitivityMouse: _getNumber(
-                      data, ['sensitivity', 'sens', 'mouse_sensitivity']),
-                  sensitivityControllerHorizontal: _getNumber(data, [
-                    'sens_horizontal',
-                    'sensHorizontal',
-                    'horizontal',
-                    'controller_horizontal'
-                  ]),
-                  sensitivityControllerVertical: _getNumber(data, [
-                    'sens_vertical',
-                    'sensVertical',
-                    'vertical',
-                    'controller_vertical'
-                  ]),
-                  dpi: _getInt(data, ['dpi', 'DPI', 'mouse_dpi']),
-                );
-
-                final isMouse = device == 'Mouse';
-                String subtitleText;
-                if (isMouse) {
-                  final parts = <String>[];
-                  parts.add('Mouse');
-                  if (player.dpi != null) parts.add('DPI: ${player.dpi}');
-                  if (player.sensitivityMouse != null)
-                    parts.add('Sens: ${player.sensitivityMouse}');
-                  subtitleText = parts.join(' — ');
-                } else {
-                  final parts = <String>[];
-                  parts.add('Controller');
-                  if (player.sensitivityControllerHorizontal != null) {
-                    parts.add('H: ${player.sensitivityControllerHorizontal}');
-                  }
-                  if (player.sensitivityControllerVertical != null) {
-                    parts.add('V: ${player.sensitivityControllerVertical}');
-                  }
-                  subtitleText = parts.join(' — ');
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: Colors.white.withOpacity(0.1),
-                      border: Border.all(
-                        color: Theme.of(context).primaryColor.withOpacity(0.3),
-                        width: 1,
+            return Column(
+              children: [
+                // Barre de recherche en haut
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 100, 16, 8),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (v) => setState(() => _searchQuery = v),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Rechercher un joueur',
+                      hintStyle: const TextStyle(color: Colors.white70),
+                      prefixIcon: Icon(Icons.search,
+                          color: Theme.of(context).primaryColor),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.08),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color:
+                              Theme.of(context).primaryColor.withOpacity(0.35),
+                        ),
                       ),
-                      boxShadow: [
-                        BoxShadow(
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
                           color:
-                              Theme.of(context).primaryColor.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
+                              Theme.of(context).primaryColor.withOpacity(0.25),
                         ),
-                      ],
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(16),
-                      leading: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color:
-                              Theme.of(context).primaryColor.withOpacity(0.2),
-                        ),
-                        child: Icon(
-                          isMouse ? Icons.mouse : Icons.gamepad,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
                           color: Theme.of(context).primaryColor,
+                          width: 1.2,
                         ),
                       ),
-                      title: Text(
-                        player.name,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      subtitle: Text(
-                        subtitleText,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white70,
-                            ),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                PlayerDetailsPage(player: player),
-                          ),
-                        );
-                      },
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear,
+                                  color: Colors.white70),
+                              onPressed: () {
+                                setState(() {
+                                  _searchQuery = '';
+                                  _searchController.clear();
+                                });
+                              },
+                            )
+                          : null,
                     ),
                   ),
-                );
-              },
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    itemCount: visibleDocs.length,
+                    itemBuilder: (context, index) {
+                      final data = visibleDocs[index].data();
+
+                      final device = _normalizeDevice(data);
+
+                      final player = Player(
+                        name: (data['name'] ?? 'Unknown').toString(),
+                        device: device,
+                        game: widget.game.name,
+                        sensitivityMouse: _getNumber(
+                            data, ['sensitivity', 'sens', 'mouse_sensitivity']),
+                        sensitivityControllerHorizontal: _getNumber(data, [
+                          'sens_horizontal',
+                          'sensHorizontal',
+                          'horizontal',
+                          'controller_horizontal'
+                        ]),
+                        sensitivityControllerVertical: _getNumber(data, [
+                          'sens_vertical',
+                          'sensVertical',
+                          'vertical',
+                          'controller_vertical'
+                        ]),
+                        dpi: _getInt(data, ['dpi', 'DPI', 'mouse_dpi']),
+                      );
+
+                      final isMouse = device == 'Mouse';
+                      String subtitleText;
+                      if (isMouse) {
+                        final parts = <String>[];
+                        parts.add('Mouse');
+                        if (player.dpi != null) parts.add('DPI: ${player.dpi}');
+                        if (player.sensitivityMouse != null)
+                          parts.add('Sens: ${player.sensitivityMouse}');
+                        subtitleText = parts.join(' — ');
+                      } else {
+                        final parts = <String>[];
+                        parts.add('Controller');
+                        if (player.sensitivityControllerHorizontal != null) {
+                          parts.add(
+                              'H: ${player.sensitivityControllerHorizontal}');
+                        }
+                        if (player.sensitivityControllerVertical != null) {
+                          parts.add(
+                              'V: ${player.sensitivityControllerVertical}');
+                        }
+                        subtitleText = parts.join(' — ');
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white.withOpacity(0.1),
+                            border: Border.all(
+                              color: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.3),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(16),
+                            leading: Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.2),
+                              ),
+                              child: Icon(
+                                isMouse ? Icons.mouse : Icons.gamepad,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                            title: Text(
+                              player.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            subtitle: Text(
+                              subtitleText,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Colors.white70,
+                                  ),
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      PlayerDetailsPage(player: player),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           },
         ),
       ),
     );
+  }
+
+  double? _toDouble(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v.toDouble();
+    if (v is String) return double.tryParse(v);
+    return null;
+  }
+
+  double? _getNumber(Map<String, dynamic> m, List<String> keys) {
+    for (final k in keys) {
+      if (m.containsKey(k)) {
+        final v = m[k];
+        final d = _toDouble(v);
+        if (d != null) return d;
+      }
+    }
+    return null;
+  }
+
+  int? _toInt(dynamic v) {
+    if (v == null) return null;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v);
+    return null;
+  }
+
+  int? _getInt(Map<String, dynamic> m, List<String> keys) {
+    for (final k in keys) {
+      if (m.containsKey(k)) {
+        final v = m[k];
+        final d = _toInt(v);
+        if (d != null) return d;
+      }
+    }
+    return null;
   }
 }
