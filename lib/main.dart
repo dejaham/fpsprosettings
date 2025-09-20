@@ -25,10 +25,11 @@ class FPSProSettingsApp extends StatelessWidget {
       title: 'FPS Pro Settings',
       // Configuration du thème sombre personnalisé
       theme: ThemeData.dark().copyWith(
-        // Couleur principale utilisée pour les accents et les mises en évidence
-        primaryColor: Color(0xFF2D00F7),
+        useMaterial3: true,
+        // Couleur principale utilisée pour les accents et les mises en évidence (vert néon)
+        primaryColor: const Color(0xFF39FF14),
         // Couleur de fond générale de l'application
-        scaffoldBackgroundColor: Color(0xFF121212),
+        scaffoldBackgroundColor: const Color(0xFF121212),
         // Style des cartes utilisées dans l'application
         cardTheme: CardTheme(
           elevation: 8,
@@ -53,6 +54,12 @@ class FPSProSettingsApp extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
+        ),
+        colorScheme: ColorScheme.fromSeed(
+          brightness: Brightness.dark,
+          seedColor: const Color(0xFF39FF14),
+        ).copyWith(
+          onPrimary: Colors.black,
         ),
       ),
       // Page d'accueil de l'application
