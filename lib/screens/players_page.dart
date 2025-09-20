@@ -255,7 +255,14 @@ class _PlayersPageState extends State<PlayersPage> {
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
-                            color: Colors.white.withOpacity(0.1),
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFF1A1A1A),
+                                Color(0xFF0A0A0A),
+                              ],
+                            ),
                             border: Border.all(
                               color: Theme.of(context)
                                   .primaryColor

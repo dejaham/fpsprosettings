@@ -46,7 +46,14 @@ class PlayerDetailsPage extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                color: Colors.white.withOpacity(0.1),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF1A1A1A),
+                    Color(0xFF0A0A0A),
+                  ],
+                ),
                 border: Border.all(
                   color: Theme.of(context).primaryColor.withOpacity(0.3),
                   width: 1,
@@ -233,7 +240,14 @@ class PlayerDetailsPage extends StatelessWidget {
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: Colors.black.withOpacity(0.35),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF1A1A1A),
+            Color(0xFF0A0A0A),
+          ],
+        ),
         border: Border.all(
           color: Theme.of(context).primaryColor.withOpacity(0.25),
           width: 1,
