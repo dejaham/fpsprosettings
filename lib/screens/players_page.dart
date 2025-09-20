@@ -76,125 +76,125 @@ class _PlayersPageState extends State<PlayersPage> {
             ],
           ),
         ),
-        child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: playersCollection.snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return Center(
-                child: Text(
-                  'Aucun joueur trouvé pour ${widget.game.name}',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.white70,
-                      ),
-                ),
-              );
-            }
-
-            final docs = snapshot.data!.docs;
-
-            String _normalizeDevice(Map<String, dynamic> data) {
-              final deviceRaw = (data['device'] ?? '').toString().toLowerCase();
-              if (deviceRaw.contains('mouse') ||
-                  deviceRaw.contains('souris') ||
-                  deviceRaw.contains('kbm') ||
-                  deviceRaw.contains('keyboard') ||
-                  deviceRaw.contains('clavier') ||
-                  deviceRaw.contains('pc')) {
-                return 'Mouse';
-              } else if (deviceRaw.contains('controller') ||
-                  deviceRaw.contains('manette') ||
-                  deviceRaw.contains('pad') ||
-                  deviceRaw.contains('gamepad')) {
-                return 'Controller';
-              } else {
-                return (data.containsKey('dpi') ||
-                        data.containsKey('sensitivity'))
-                    ? 'Mouse'
-                    : 'Controller';
-              }
-            }
-
-            // Filtrage par device
-            final filteredDocs = docs.where((d) {
-              final dev = _normalizeDevice(d.data());
-              switch (_filter) {
-                case DeviceFilterOption.all:
-                  return true;
-                case DeviceFilterOption.mouse:
-                  return dev == 'Mouse';
-                case DeviceFilterOption.controller:
-                  return dev == 'Controller';
-              }
-            }).toList();
-
-            // Filtrage par nom (insensible à la casse)
-            final q = _searchQuery.trim().toLowerCase();
-            final visibleDocs = filteredDocs.where((d) {
-              if (q.isEmpty) return true;
-              final name = (d.data()['name'] ?? '').toString().toLowerCase();
-              return name.contains(q);
-            }).toList();
-
-            return Column(
-              children: [
-                // Barre de recherche en haut
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 100, 16, 8),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (v) => setState(() => _searchQuery = v),
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Rechercher un joueur',
-                      hintStyle: const TextStyle(color: Colors.white70),
-                      prefixIcon: Icon(Icons.search,
-                          color: Theme.of(context).primaryColor),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.08),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color:
-                              Theme.of(context).primaryColor.withOpacity(0.35),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color:
-                              Theme.of(context).primaryColor.withOpacity(0.25),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: Theme.of(context).primaryColor,
-                          width: 1.2,
-                        ),
-                      ),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear,
-                                  color: Colors.white70),
-                              onPressed: () {
-                                setState(() {
-                                  _searchQuery = '';
-                                  _searchController.clear();
-                                });
-                              },
-                            )
-                          : null,
+        child: Column(
+          children: [
+            // Barre de recherche en haut (hors StreamBuilder pour conserver le focus)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 100, 16, 8),
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                onChanged: (v) => setState(() => _searchQuery = v),
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Rechercher un joueur',
+                  hintStyle: const TextStyle(color: Colors.white70),
+                  prefixIcon:
+                      Icon(Icons.search, color: Theme.of(context).primaryColor),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.08),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor.withOpacity(0.35),
                     ),
                   ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor.withOpacity(0.25),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor,
+                      width: 1.2,
+                    ),
+                  ),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.white70),
+                          onPressed: () {
+                            setState(() {
+                              _searchQuery = '';
+                              _searchController.clear();
+                            });
+                          },
+                        )
+                      : null,
                 ),
-                Expanded(
-                  child: ListView.builder(
+              ),
+            ),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: playersCollection.snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'Aucun joueur trouvé pour ${widget.game.name}',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Colors.white70,
+                            ),
+                      ),
+                    );
+                  }
+
+                  final docs = snapshot.data!.docs;
+
+                  String _normalizeDevice(Map<String, dynamic> data) {
+                    final deviceRaw =
+                        (data['device'] ?? '').toString().toLowerCase();
+                    if (deviceRaw.contains('mouse') ||
+                        deviceRaw.contains('souris') ||
+                        deviceRaw.contains('kbm') ||
+                        deviceRaw.contains('keyboard') ||
+                        deviceRaw.contains('clavier') ||
+                        deviceRaw.contains('pc')) {
+                      return 'Mouse';
+                    } else if (deviceRaw.contains('controller') ||
+                        deviceRaw.contains('manette') ||
+                        deviceRaw.contains('pad') ||
+                        deviceRaw.contains('gamepad')) {
+                      return 'Controller';
+                    } else {
+                      return (data.containsKey('dpi') ||
+                              data.containsKey('sensitivity'))
+                          ? 'Mouse'
+                          : 'Controller';
+                    }
+                  }
+
+                  // Filtrage par device
+                  final filteredDocs = docs.where((d) {
+                    final dev = _normalizeDevice(d.data());
+                    switch (_filter) {
+                      case DeviceFilterOption.all:
+                        return true;
+                      case DeviceFilterOption.mouse:
+                        return dev == 'Mouse';
+                      case DeviceFilterOption.controller:
+                        return dev == 'Controller';
+                    }
+                  }).toList();
+
+                  // Filtrage par nom (insensible à la casse)
+                  final q = _searchQuery.trim().toLowerCase();
+                  final visibleDocs = filteredDocs.where((d) {
+                    if (q.isEmpty) return true;
+                    final name =
+                        (d.data()['name'] ?? '').toString().toLowerCase();
+                    return name.contains(q);
+                  }).toList();
+
+                  return ListView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                     itemCount: visibleDocs.length,
                     itemBuilder: (context, index) {
@@ -316,11 +316,11 @@ class _PlayersPageState extends State<PlayersPage> {
                         ),
                       );
                     },
-                  ),
-                ),
-              ],
-            );
-          },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
