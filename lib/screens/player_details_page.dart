@@ -35,7 +35,12 @@ class PlayerDetailsPage extends StatelessWidget {
         ),
         // Liste déroulante des informations du joueur
         child: ListView(
-          padding: EdgeInsets.fromLTRB(16, 100, 16, 16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            MediaQuery.of(context).padding.top + kToolbarHeight + 16,
+            16,
+            16,
+          ),
           children: [
             // Carte principale contenant les informations du joueur
             Container(
