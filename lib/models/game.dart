@@ -12,7 +12,8 @@ class Game {
     return Game(
       id: doc.id,
       name: (data['name'] ?? '').toString(),
-      imageUrl: (data['imageUrl'] ?? data['image_url'] ?? '').toString(),
+      imageUrl: (data['logo'] ?? data['imageUrl'] ?? data['image_url'] ?? '')
+          .toString(),
     );
   }
 }
