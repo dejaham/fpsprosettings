@@ -37,15 +37,28 @@ class HomePage extends StatelessWidget {
       extendBodyBehindAppBar: true,
       // Configuration de la barre d'application avec le titre et l'icône
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true, // bien centrer
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min, // évite que ça prenne tout l'espace
           children: [
-            Icon(Icons.sports_esports, color: Theme.of(context).primaryColor),
-            SizedBox(width: 10),
-            Text('FPS Pro Settings'),
+            Image.asset(
+              'assets/images/app_icon.png', // ton logo
+              height: 32, // ajuste la taille
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'FPS Pro Settings',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
+
       // Corps principal avec fond dégradé
       body: Container(
         decoration: BoxDecoration(
