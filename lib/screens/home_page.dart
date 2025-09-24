@@ -17,23 +17,56 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        centerTitle: true, // bien centrer
+        centerTitle: true,
         title: Row(
-          mainAxisSize: MainAxisSize.min, // évite que ça prenne tout l'espace
+          mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
-              'assets/images/app_icon.png', // ton logo
-              height: 32, // ajuste la taille
+              'assets/images/app_icon.png',
+              height: 32,
             ),
             const SizedBox(width: 10),
             Text(
               'FPS Pro Settings',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.0,
+                  ),
             ),
           ],
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(42),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Find the best settings from pro players',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 17,
+                      color: Colors.white70,
+                      letterSpacing: 0.4,
+                      fontWeight: FontWeight.w600,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 6),
+              Container(
+                height: 2,
+                width: 140,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      Theme.of(context).primaryColor,
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
 
