@@ -13,8 +13,6 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Extension de l'interface derrière la barre d'application
-      extendBodyBehindAppBar: true,
       // Configuration de la barre d'application avec le titre et l'icône
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -53,7 +51,7 @@ class HomePage extends StatelessWidget {
         ),
         // Grille des jeux avec espacement et padding
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 100, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: FirebaseFirestore.instance.collection('games').snapshots(),
             builder: (context, snapshot) {
@@ -89,6 +87,7 @@ class HomePage extends StatelessWidget {
               }
 
               return GridView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,

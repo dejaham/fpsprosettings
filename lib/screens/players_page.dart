@@ -52,15 +52,15 @@ class _PlayersPageState extends State<PlayersPage> {
             itemBuilder: (context) => const [
               PopupMenuItem(
                 value: DeviceFilterOption.all,
-                child: Text('Tous les devices'),
+                child: Text('All devices'),
               ),
               PopupMenuItem(
                 value: DeviceFilterOption.mouse,
-                child: Text('Souris uniquement'),
+                child: Text('Mouse only'),
               ),
               PopupMenuItem(
                 value: DeviceFilterOption.controller,
-                child: Text('Manette uniquement'),
+                child: Text('Controller only'),
               ),
             ],
           ),

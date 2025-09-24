@@ -29,10 +29,6 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/images/cod_icon.jpg
-    - assets/images/apex_icon.jpg
-    - assets/images/valorant_icon.jpg
-    - assets/images/r6_icon.jpg
 
 flutter_icons:
   android: true
