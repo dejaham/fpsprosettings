@@ -87,7 +87,12 @@ class HomePage extends StatelessWidget {
               }
 
               return GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.fromLTRB(
+                  16.0,
+                  0.0,
+                  16.0,
+                  24.0 + MediaQuery.of(context).padding.bottom,
+                ),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,
