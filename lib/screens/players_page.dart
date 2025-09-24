@@ -92,7 +92,7 @@ class _PlayersPageState extends State<PlayersPage> {
                 onChanged: (v) => setState(() => _searchQuery = v),
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Rechercher un joueur',
+                  hintText: 'Find a player',
                   hintStyle: const TextStyle(color: Colors.white70),
                   prefixIcon:
                       Icon(Icons.search, color: Theme.of(context).primaryColor),
@@ -144,7 +144,7 @@ class _PlayersPageState extends State<PlayersPage> {
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return Center(
                       child: Text(
-                        'Aucun joueur trouvé pour ${widget.game.name}',
+                        'No player found for ${widget.game.name}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Colors.white70,
                             ),

@@ -174,7 +174,7 @@ class PlayerDetailsPage extends StatelessWidget {
                               child: _metricCard(
                                 context,
                                 icon: Icons.mouse,
-                                label: 'Sensibilité Souris',
+                                label: 'Mouse Sensitivity',
                                 value: player.sensitivityMouse!.toString(),
                               ),
                             ),
@@ -191,7 +191,7 @@ class PlayerDetailsPage extends StatelessWidget {
                         _metricCard(
                           context,
                           icon: Icons.mouse,
-                          label: 'Sensibilité Souris',
+                          label: 'Mouse Sensitivity',
                           value: player.sensitivityMouse!.toString(),
                         ),
                     ],
@@ -202,7 +202,7 @@ class PlayerDetailsPage extends StatelessWidget {
                             child: _metricCard(
                               context,
                               icon: Icons.swap_horiz,
-                              label: 'Sensibilité Horizontale',
+                              label: 'Horizontal Sensitivity',
                               value: player.sensitivityControllerHorizontal
                                       ?.toString() ??
                                   '-',
@@ -213,7 +213,7 @@ class PlayerDetailsPage extends StatelessWidget {
                             child: _metricCard(
                               context,
                               icon: Icons.swap_vert,
-                              label: 'Sensibilité Verticale',
+                              label: 'Vertical Sensitivity',
                               value: player.sensitivityControllerVertical
                                       ?.toString() ??
                                   '-',

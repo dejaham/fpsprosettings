@@ -62,7 +62,7 @@ class HomePage extends StatelessWidget {
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                 return Center(
                   child: Text(
-                    'Aucun jeu disponible pour le moment',
+                    'No games available at the moment.',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: Colors.white70,
                         ),
@@ -78,7 +78,7 @@ class HomePage extends StatelessWidget {
               if (games.isEmpty) {
                 return Center(
                   child: Text(
-                    'Aucun jeu disponible pour le moment',
+                    'No games available at the moment.',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: Colors.white70,
                         ),
