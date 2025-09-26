@@ -30,7 +30,7 @@ void main() {
       // Metric cards content
       expect(find.text('DPI'), findsOneWidget);
       expect(find.text('800'), findsOneWidget);
-      expect(find.text('Sensibilité Souris'), findsOneWidget);
+      expect(find.text('Mouse Sensitivity'), findsOneWidget);
       expect(find.text('0.4'), findsOneWidget);
 
       // Icon
@@ -55,9 +55,9 @@ void main() {
       expect(find.text('Call of Duty'), findsOneWidget);
       expect(find.text('Controller'), findsOneWidget);
 
-      expect(find.text('Sensibilité Horizontale'), findsOneWidget);
+      expect(find.text('Horizontal Sensitivity'), findsOneWidget);
       expect(find.text('7.0'), findsOneWidget); // double toString()
-      expect(find.text('Sensibilité Verticale'), findsOneWidget);
+      expect(find.text('Vertical Sensitivity'), findsOneWidget);
       expect(find.text('6.0'), findsOneWidget);
 
       expect(find.byIcon(Icons.gamepad), findsWidgets);
